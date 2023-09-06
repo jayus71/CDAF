@@ -92,12 +92,8 @@ def discrepancy_l2(out1, out2):
     return ops.mean(ops.square(out1 - out2))
 
 # add the mindspore's train functions
-def net_forward(model,loss_fn,input,target):
-    logit = model(input)
-    loss = loss_fn(logit,target)
-    return loss
 
-def pre_train_source_minds():
+def pre_train_source_mindspore():
     source_expert = MyModel(2,2,10)
     source_expert_optimizer = nn.Adam(source_expert.parameters(), learning_rate=0.001)
 
@@ -106,7 +102,25 @@ def pre_train_source_minds():
     y_s = mindspore.Tensor(y_s).long().reshape(-1)
 
     criterion = nn.loss.SoftmaxCrossEntropyWithLogits(sparse=True, reduction='mean')
+    def net_forward(input,target):
+        logit = source_expert(input)
+        loss = criterion(logit,target)
+        return loss,logit   
     
+    net_backward = mindspore.value_and_grad(net_forward, None, source_expert_optimizer.parameters, has_aux=True)
+
+    def train_step(input, target):
+        (loss, _), grad = net_backward(input, target)
+        source_expert_optimizer(grad)
+        return loss
+
+    for epoch in tqdm(range(1000)):
+        loss = float(train_step(x_s, y_s).asnumpy())
+        print('Epoch: {}, Loss: {}'.format(epoch, loss))
+
+    mindspore.save_checkpoint(source_expert, "source_model.ckpt")
+
+
 
 def pre_train_source():
     source_expert = MyModel(2,2,10)
@@ -149,8 +163,11 @@ def train():
     source_model_dict = mindspore.load_checkpoint("source_model.ckpt")
     params_not_load,_ = mindspore.load_param_into_net(source_model, source_model_dict)
 
+    
     # initialize target model with source expert
-    target_model_dict = target_model.state_dict()
+    # 
+    # target_model_dict = target_model.state_dict()
+    target_model_dict = target_model.parameters_dict()
     pretrained_dict = {}
     for k, _ in target_model_dict.items():
         if k in source_model_dict:
@@ -158,8 +175,10 @@ def train():
         elif 'predictor' in k:
             pretrained_dict[k] = source_model_dict['predictor.'+k.split('.')[1]]
 
+    # update the params with the source
     target_model_dict.update(pretrained_dict)
-    target_model.load_state_dict(target_model_dict)
+    # target_model.load_state_dict(target_model_dict)
+    params_not_load,_ = mindspore.load_param_into_net(target_model,target_model_dict)
     
     # optimizer
     target_optimizer = nn.Adam(target_model.parameters(), learning_rate=0.001)
@@ -172,15 +191,15 @@ def train():
     x_t = mindspore.Tensor(x_t).float()
     y_t = mindspore.Tensor(y_t).long().reshape(-1)
 
-    criterion = nn.CrossEntropyLoss()
+    criterion = nn.loss.SoftmaxCrossEntropyWithLogits(sparse=True, reduction='mean')
 
     source_model.eval()
     target_model.train()
     
-    for p in source_model.parameters():
+    for p in source_model.get_parameters():
         p.requires_grad = False
     
-    for p in target_model.parameters():
+    for p in target_model.get_parameters():
         p.requires_grad = True
 
         
