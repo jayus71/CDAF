@@ -1,5 +1,7 @@
 # Cross-domain Adaptative Learning for Online Advertisement Customer Lifetime Value Prediction
 
+> this repo is forked from the [ TL-UESTC/CDAF](https://github.com/TL-UESTC/CDAF) to convert code from ***pytorch*** to ***mindspore***
+
 Hongzu Su, Zhekai Du, Jingjing Li, Lei Zhu, Ke Lu
 
 ![](./framework.png)
