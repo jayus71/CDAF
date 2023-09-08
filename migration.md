@@ -29,5 +29,7 @@ torch和mindspore的对比如[下图](https://www.mindspore.cn/docs/zh-CN/master
 
 - 网络定义，在PyTorch的网络继承nn.Module；类似地，MindSpore的网络继承nn.Cell，pytorch中的forward函数对应mindspore的construct函数；
 - 正向计算，运行实例化网络后可以得到out（logit），将logit和target作为输入计算loss
-- 反向计算，得到loss后，我们可以进行反向计算。在PyTorch中可使用`loss.backward()`计算梯度，在MindSpore中，先用`mindspore.grad()`定义出反向传播方程net_backward，再将输入传入net_backward中，即可计算梯度
+- 反向计算，得到loss后，我们可以进行反向计算。在PyTorch中可使用`loss.backward()`计算梯度，在MindSpore中，先用`mindspore.grad()`定义出反向传播方程net_backward，再将输入传入net_backward中，即可计算梯度，*mindspore官网给的反向传播似乎有点问题，参考了另外的代码：[昇腾论坛](https://www.hiascend.com/forum/thread-0257117453649000035-1-1.html)*
 - 梯度更新，将计算后的梯度更新到网络的Parameters中。在PyTorch中使用`optim.step()`；在MindSpore中，将Parameter的梯度传入定义好的optim中，即可完成梯度更新。
+
+$$W\left(P_{1}, P_{2}\right)=\inf _{\gamma \sim \Pi\left(P_{1}, P_{2}\right)} \mathbb{E}_{(x, y) \sim \gamma}[\|x-y\|]$$
