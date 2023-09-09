@@ -26,35 +26,35 @@
 对应源预测器的优化方法如下：
 
 
-$$\begin{aligned}\mathcal{L}_{t}^{s}& =\mathcal{L}_\text{CrossEntropy}{ ( 1 _ { \{ y _ s > N \} };p_s)} +1_{\{y_{s}>N\}}\mathcal{L}_{\mathrm{Lognormal}}(y_{s};\mu_{s},\sigma_{s})\end{aligned}$$ 
+$$\begin{aligned}\mathcal{L}_ {t}^{s}& =\mathcal{L}_ \text{CrossEntropy}{ ( 1 _ { \{ y _ s > N \} };p_s)} +1_{\{y_{s}>N\}}\mathcal{L}_ {\mathrm{Lognormal}}(y_{s};\mu_{s},\sigma_{s})\end{aligned}$$  
 
-目标预测器优化方法相同，同时也使用了最小化源预测器和目标预测器输出$l_1$距离的优化方法：
+目标预测器优化方法相同，同时也使用了最小化源预测器和目标预测器输出 $l_1$ 距离的优化方法：
 
-$$\mathcal{L}_d=\dfrac{1}{K}\sum_{i=1}^K|(p_s,\mu_s,\sigma_s)_i-(p_t,\mu_t,\sigma_t)_i|$$
+$$\mathcal{L}_ d=\dfrac{1}{K}\sum_{i=1}^K|(p_s,\mu_s,\sigma_s)_i-(p_t,\mu_t,\sigma_t)_i|$$
 
 结合上述优化方法，最终使用的总优化公式为：
 
-$$\mathcal{L}_{a}=\lambda_{j}\mathcal{L}_{j}+\lambda_{s}\mathcal{L}_{t}^{s}+\lambda_{t}\mathcal{L}_{t}^{t}+\lambda_{d}\mathcal{L}_{d}$$
+$$\mathcal{L}_ {a}=\lambda_{j}\mathcal{L}_ {j}+\lambda_{s}\mathcal{L}_ {t}^{s}+\lambda_{t}\mathcal{L}_ {t}^{t}+\lambda_{d}\mathcal{L}_{d}$$
 
-> 其中$\lambda_{j,s,t,d}$均为超参数，在论文后续也比较了超参数的不同取值对结果的影响，应该根据数据集的不同取对应的超参数
+> 其中 $\lambda_{j,s,t,d}$ 均为超参数，在论文后续也比较了超参数的不同取值对结果的影响，应该根据数据集的不同取对应的超参数
 
 ## 实验
 结果比较以AUC和Gini为评估指标
 1. 比较了只在目标域训练和测试的多个模型，利用CDAF在两个域上进行训练和测试的结果，证明了CDAF的有效性
 2. 比较了直接进行微调和CDAF的结果，证明同时学习领域内在和无关知识的有效性
 3. 框架模块分离实验，分别去掉框架中的各个模块，以探讨模块对实验结果的贡献大小
-4. 超参数实验，探究$\lambda_{j,s,t,d}$取值对实验结果的影响
+4. 超参数实验，探究 $\lambda_{j,s,t,d}$ 取值对实验结果的影响
 ## 补充知识
 ### Wasserstein discrepancy 
 Wasserstein距离（Wasserstein distance），也被称为Wasserstein度量、Wasserstein距离、Earth Mover's Distance（EMD）等，是一种用于度量两个概率分布之间的差异的数学方法。
 
 Wasserstein距离衡量了将一个概率分布转换成另一个概率分布所需的最小代价。这个代价通常被解释为将一个分布中的一组质量从一个位置移动到另一个位置的最小成本，其中质量可以是物体、能量或其他类型的资源。因此，Wasserstein距离可以被视为一种"运输"或"搬运"两个分布之间的代价[^1]。
 
-$$W\left(P_{1}, P_{2}\right)=\inf _{\gamma \sim \Pi\left(P_{1}, P_{2}\right)} \mathbb{E}_{(x, y) \sim \gamma}[\|x-y\|]$$
+$$W\left(P_{1}, P_{2}\right)=\inf _ {\gamma \sim \Pi\left(P_{1}, P_{2}\right)} \mathbb{E}_{(x, y) \sim \gamma}[\|x-y\|]$$
 
 本文中对应双预测器最小化的公式：
 
-$$\begin{gathered}\mathcal{L}_{j} =\inf_{\gamma\in\Pi\left(\mathbb{P}_{e_{s}},\mathbb{P}_{e_{j}^{s}}\right)}\mathbb{E}_{\left(e_{s},e_{j}^{s}\right)\sim\gamma}\left[\left\|e_{s}-e_{j}^{s}\right\|\right] +\inf_{\gamma\in\Pi\left(\mathbb{P}_{e_s},\mathbb{P}_{e_j^t}\right)}\mathbb{E}_{\left(e_s,e_j^t\right)\sim\gamma}\left[\left\|e_s-e_j^t\right\|\right]\end{gathered}$$
+$$\begin{gathered}\mathcal{L}_ {j} = \inf_ { \gamma \in\Pi \left (\mathbb{P}_ {e_ {s}},\mathbb{P}_ {e_ {j}^{s}}\right)}\mathbb{E}_ {\left(e_{s},e_{j}^{s}\right)\sim\gamma} \left[\left\|e_{s}-e_{j}^{s}\right\|\right] +\inf_{\gamma\in\Pi\left(\mathbb{P}_ {e_s},\mathbb{P}_ {e_j^t}\right)}\mathbb{E}_{\left(e_s,e_j^t\right)\sim\gamma}\left[\left\|e_s-e_j^t\right\|\right]\end{gathered}$$
 
 由于Wasserstein距离很难计算，在本文中使用了sliced Wasserstein distance的方法进行计算：
 1. 若为高维数据，则随机投影到128维的低维空间
@@ -70,5 +70,11 @@ click through rate model：一类用于估计在线广告或推荐系统中用�
 ![normalized gini](image-2.png)
 
  Gini系数最初用于衡量财富分布不平等性，但后来被引入到模型评估领域。Gini系数（也称为Gini指数或Gini系数）度量了模型对正类别（例如，点击事件发生）和负类别（例如，点击事件未发生）样本的排序能力。它通过绘制累积分布函数（CDF）曲线来计算，曲线下的面积越大，表示模型的排序越好。
+
+## github 公式显示
+> $$\mathcal{L}_ {a}=\lambda_{j}\mathcal{L}_ {j}+\lambda_{s}\mathcal{L}_ {t}^{s}+\lambda_{t}\mathcal{L}_ {t}^{t}+\lambda_{d}\mathcal{L}_{d}$$ 
+> 上述公式就可以正常显示
+> $$\mathcal{L}_{a}=\lambda_{j}\mathcal{L}_{j}+\lambda_{s}\mathcal{L}_{t}^{s}+\lambda_{t}\mathcal{L}_{t}^{t}+\lambda_{d}\mathcal{L}_{d}$$
+> 这个就不行，很奇怪，在github的md编辑页面中可以发现第二个公式有的字母是斜体，在斜体字母前加空格就能取消斜体显示进而正常显示代码了，十分奇怪。
 
 [^1]:https://zhuanlan.zhihu.com/p/353418080
