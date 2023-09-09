@@ -24,20 +24,18 @@
 3. 双预测器优化方法
 
 对应源预测器的优化方法如下：
-$$
-\begin{aligned}
-\mathcal{L}_{t}^{s}& =\mathcal{L}_\text{CrossEntropy}{ ( 1 _ { \{ y _ s > N \} };p_s)} +1_{\{y_{s}>N\}}\mathcal{L}_{\mathrm{Lognormal}}(y_{s};\mu_{s},\sigma_{s}),
-\end{aligned}
-$$ 
+
+
+$$\begin{aligned}\mathcal{L}_{t}^{s}& =\mathcal{L}_\text{CrossEntropy}{ ( 1 _ { \{ y _ s > N \} };p_s)} +1_{\{y_{s}>N\}}\mathcal{L}_{\mathrm{Lognormal}}(y_{s};\mu_{s},\sigma_{s})\end{aligned}$$ 
+
 目标预测器优化方法相同，同时也使用了最小化源预测器和目标预测器输出$l_1$距离的优化方法：
-$$
-\mathcal{L}_d=\dfrac{1}{K}\sum_{i=1}^K|(p_s,\mu_s,\sigma_s)_i-(p_t,\mu_t,\sigma_t)_i|
-$$
+
+$$\mathcal{L}_d=\dfrac{1}{K}\sum_{i=1}^K|(p_s,\mu_s,\sigma_s)_i-(p_t,\mu_t,\sigma_t)_i|$$
 
 结合上述优化方法，最终使用的总优化公式为：
-$$
-\mathcal{L}_{a}=\lambda_{j}\mathcal{L}_{j}+\lambda_{s}\mathcal{L}_{t}^{s}+\lambda_{t}\mathcal{L}_{t}^{t}+\lambda_{d}\mathcal{L}_{d}
-$$
+
+$$\mathcal{L}_{a}=\lambda_{j}\mathcal{L}_{j}+\lambda_{s}\mathcal{L}_{t}^{s}+\lambda_{t}\mathcal{L}_{t}^{t}+\lambda_{d}\mathcal{L}_{d}$$
+
 > 其中$\lambda_{j,s,t,d}$均为超参数，在论文后续也比较了超参数的不同取值对结果的影响，应该根据数据集的不同取对应的超参数
 
 ## 实验
@@ -53,13 +51,11 @@ Wasserstein距离（Wasserstein distance），也被称为Wasserstein度量、Wa
 Wasserstein距离衡量了将一个概率分布转换成另一个概率分布所需的最小代价。这个代价通常被解释为将一个分布中的一组质量从一个位置移动到另一个位置的最小成本，其中质量可以是物体、能量或其他类型的资源。因此，Wasserstein距离可以被视为一种"运输"或"搬运"两个分布之间的代价[^1]。
 
 $$W\left(P_{1}, P_{2}\right)=\inf _{\gamma \sim \Pi\left(P_{1}, P_{2}\right)} \mathbb{E}_{(x, y) \sim \gamma}[\|x-y\|]$$
+
 本文中对应双预测器最小化的公式：
-$$
-\begin{gathered}
-\mathcal{L}_{j} =\inf_{\gamma\in\Pi\left(\mathbb{P}_{e_{s}},\mathbb{P}_{e_{j}^{s}}\right)}\mathbb{E}_{\left(e_{s},e_{j}^{s}\right)\sim\gamma}\left[\left\|e_{s}-e_{j}^{s}\right\|\right] \\
-+\inf_{\gamma\in\Pi\left(\mathbb{P}_{e_s},\mathbb{P}_{e_j^t}\right)}\mathbb{E}_{\left(e_s,e_j^t\right)\sim\gamma}\left[\left\|e_s-e_j^t\right\|\right], 
-\end{gathered}
-$$
+
+$$\begin{gathered}\mathcal{L}_{j} =\inf_{\gamma\in\Pi\left(\mathbb{P}_{e_{s}},\mathbb{P}_{e_{j}^{s}}\right)}\mathbb{E}_{\left(e_{s},e_{j}^{s}\right)\sim\gamma}\left[\left\|e_{s}-e_{j}^{s}\right\|\right] +\inf_{\gamma\in\Pi\left(\mathbb{P}_{e_s},\mathbb{P}_{e_j^t}\right)}\mathbb{E}_{\left(e_s,e_j^t\right)\sim\gamma}\left[\left\|e_s-e_j^t\right\|\right]\end{gathered}$$
+
 由于Wasserstein距离很难计算，在本文中使用了sliced Wasserstein distance的方法进行计算：
 1. 若为高维数据，则随机投影到128维的低维空间
 2. 对两个向量排序（使用topk函数）
